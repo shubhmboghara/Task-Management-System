@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useTask } from '../../Context/TaskContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import Taskinput from '../Taskinput/Taskinput';
-import { User } from 'lucide-react';
 
 const statuses = ['Unassigned', 'TO DO', 'Inprogress', 'In Reviews', 'completed', 'NEW'];
 const users = JSON.parse(localStorage.getItem('user'));

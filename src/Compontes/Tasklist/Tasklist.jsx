@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useTask } from '../../Context/TaskContext';
 import Navbar from '../Navbar/Navabar';
 import Taskinput from '../Taskinput/Taskinput';
-import { motion, AnimatePresence } from 'framer-motion';
 
 
 

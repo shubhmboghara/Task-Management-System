@@ -1,10 +1,7 @@
 import React from 'react'
 import { useAuth } from '../../Context/AuthContext'
-import Login from '../Login/Login'
 import { useNavigate } from 'react-router-dom'
-import { Link } from 'react-router-dom'
 import Navabar from '../Navbar/Navabar'
-import Tasklist from '../Tasklist/Tasklist'
 import KanbanBoard from '../kanban-board/kanban-board'
 
 function Dashboard() {

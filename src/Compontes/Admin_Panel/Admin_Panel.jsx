@@ -1,10 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../../Context/AuthContext'
-import { useNavigate } from 'react-router-dom'
-import { Link } from 'react-router-dom'
 import Navabar from '../Navbar/Navabar'
-import { Annoyed, User } from 'lucide-react'
-import { useTask } from '../../Context/TaskContext'
 import KanbanBoard from '../kanban-board/kanban-board'
 
 function Admin_Panel() {
