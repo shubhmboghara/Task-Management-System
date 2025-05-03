@@ -27,13 +27,16 @@ const Taskinput = ({
   }, []);
 
   const toggleUser = (userId) => {
-    const selected = form.assignedTo.includes(userId);
-    const updated = selected
+    const updated = form.assignedTo.includes(userId)
       ? form.assignedTo.filter((id) => id !== userId)
       : [...form.assignedTo, userId];
 
-    setForm({ ...form, assignedTo: updated });
+    setForm((prev) => ({ ...prev, assignedTo: updated }));
   };
+
+  const usersList = Array.isArray(users) ? users : [];
+
+  console.log('Users List:', usersList); // Debugging user list
 
   return (
     <AnimatePresence>
@@ -60,8 +63,7 @@ const Taskinput = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {/* Multi-User Dropdown */}
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative" ref={dropdownRef} style={{ zIndex: 50 }}>
               <label className="text-white font-medium">Assign to:</label>
               <div
                 className="border p-2 rounded bg-white text-black cursor-pointer dark:bg-slate-700 dark:text-white"
@@ -69,14 +71,14 @@ const Taskinput = ({
               >
                 {form.assignedTo.length === 0
                   ? 'Select users'
-                  : users
+                  : usersList
                       .filter((u) => form.assignedTo.includes(u.id))
                       .map((u) => u.name)
                       .join(', ')}
               </div>
               {isDropdownOpen && (
-                <div className="absolute bg-white dark:bg-slate-800 shadow-lg border rounded mt-1 w-full z-10 max-h-48 overflow-y-auto">
-                  {users.map((user) => (
+                <div className="absolute bg-white dark:bg-slate-800 shadow-lg border rounded mt-1 w-full max-h-48 overflow-y-auto">
+                  {usersList.map((user) => (
                     <label
                       key={user.id}
                       className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-slate-600"
