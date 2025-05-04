@@ -12,21 +12,13 @@ function Tasklist() {
   const [users, setUsers] = useState(() => JSON.parse(localStorage.getItem("users")) || null)
 
 
-  const [newtask, setNewtask] = useState({
-    ProjectName: '',
-    title: '',
-    ClientName: '',
-    description: '',
-    assignedTo: [],
-    status: 'NEW',
-    deadline: ''
-  });
+  
 
   const handleAdd = () => {
     if (editTask) return;
     const { ProjectName, title, ClientName, description, assignedTo, status, deadline } = newtask;
 
-    if (!ProjectName.trim() || !title.trim() || !ClientName.trim() || !description.trim() 
+    if (!ProjectName.trim() || !title.trim() || !ClientName.trim() || !description.trim()
       || !status.trim() || !deadline) {
       setErrorMessage('Please fill out all fields.');
       return;
@@ -36,13 +28,14 @@ function Tasklist() {
       setErrorMessage('Due Date cannot be in the past.');
       return;
     }
+    
     setErrorMessage('');
     addTask({ ...newtask, id: Date.now() });
     setNewtask({ ProjectName: '', title: '', ClientName: '', description: '', assignedTo: [], status: 'NEW', deadline: '', Priority: "" });
     setShowForm(false);
   };
 
-
+  
   const {
     totalTasks,
     pendingTasks,
@@ -133,10 +126,10 @@ function Tasklist() {
       addTask(payload);
     }
 
-    setErrorMessage("");           
-    setForm(defaultFormState);     
-    setEditTaskId(null);          
-    setShowForm(false); 
+    setErrorMessage("");
+    setForm(defaultFormState);
+    setEditTaskId(null);
+    setShowForm(false);
   };
 
   return (
@@ -184,15 +177,16 @@ function Tasklist() {
           <Taskinput
             showForm={showForm}
             setShowForm={setShowForm}
-            form={newtask}
-            setForm={setNewtask}
+            form={form}
+            setForm={setForm}
             inputClass={inputClass}
             errorMessage={errorMessage}
             today={today}
             users={users}
-            editTaskId={editTask?.id}
-            handleAddOrUpdate={handleAdd}
+            editTaskId={editTaskId}
+            handleAddOrUpdate={handleAddOrUpdate}
           />
+
 
           <div className="px-5 pb-5 overflow-x-auto">
             <table className="min-w-full text-left text-white">
@@ -255,12 +249,10 @@ function Tasklist() {
                         Edit
                       </button>
                       <button
-                        className="text-blue-400 text-xs underline"
-                        onClick={() => {
-                          setEditTask(task);
-                        }}
+                        onClick={() => removeTask(task.id)}
+                        className="text-red-400 hover:underline"
                       >
-                        Edit
+                        Delete
                       </button>
                     </td>
                   </tr>

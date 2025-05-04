@@ -3,17 +3,29 @@ import { useTask } from '../../Context/TaskContext';
 import { motion } from 'framer-motion';
 import Taskinput from '../Taskinput/Taskinput';
 
+// A little toast for errors
+function ErrorToast({ message }) {
+  if (!message) return null;
+  return (
+    <div className="fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded shadow-lg animate-slide-in">
+      {message}
+    </div>
+  );
+}
+
 export default function KanbanBoard() {
   const statuses = ['Unassigned', 'TO DO', 'Inprogress', 'In Reviews', 'completed', 'NEW'];
+  const today = new Date().toISOString().split('T')[0];
   const [storedUsers] = useState(JSON.parse(localStorage.getItem('users') || '[]'));
   const [adminuser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
   const [user] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
   const users = Array.isArray(storedUsers) ? storedUsers : storedUsers ? [storedUsers] : [];
-  const today = new Date().toISOString().split('T')[0];
+
+  const { tasks, addTask, updateTask, removeTask, moveTaskToColumn } = useTask();
+
   const [editTask, setEditTask] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const inputClass = 'w-full p-2 mb-2 rounded bg-gray-700 text-white border border-gray-600';
   const [newtask, setNewtask] = useState({
     ProjectName: '',
     title: '',
@@ -24,30 +36,62 @@ export default function KanbanBoard() {
     deadline: '',
     Priority: ''
   });
-  const { tasks, addTask, removeTask, moveTaskToColumn, updateTask } = useTask();
+
+  // When editTask changes, populate the form
   useEffect(() => {
     if (editTask) {
       setNewtask({ ...editTask });
       setShowForm(true);
     }
   }, [editTask]);
+
+  // Toast helper
+  const toastError = msg => {
+    setErrorMessage(msg);
+    setTimeout(() => setErrorMessage(''), 3000);
+  };
+
+  // Move only if assigned
+  const handleMoveTask = (taskId, newStatus) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    // Require assignment before moving out of Unassigned
+    if (
+      newStatus !== 'Unassigned' &&
+      (!Array.isArray(task.assignedTo) || task.assignedTo.length === 0)
+    ) {
+      toastError('❌ Please assign this task first using the Edit button.');
+      return;
+    }
+
+    moveTaskToColumn(taskId, newStatus);
+  };
+
+  // Add or update with validation
   const handleAddOrUpdate = () => {
     const { ProjectName, title, ClientName, description, assignedTo, status, deadline } = newtask;
-    if (!ProjectName.trim() || !title.trim() || !ClientName.trim() || !description.trim() || !status.trim() || !deadline) {
-      setErrorMessage('Please fill out all fields.');
+    if (!ProjectName.trim() || !title.trim() || !ClientName.trim() || !description.trim() || !status || !deadline) {
+      errorMessage('Please fill out all fields.');
       return;
     }
     if (deadline < today) {
-      setErrorMessage('Due Date cannot be in the past.');
+      errorMessage('Due Date cannot be in the past.');
       return;
     }
-    setErrorMessage('');
+    // If no one assigned, default column is Unassigned
+    if (!assignedTo || assignedTo.length === 0) {
+      newtask.status = 'Unassigned';
+    }
+
     if (editTask) {
       updateTask(editTask.id, { ...newtask });
       setEditTask(null);
     } else {
       addTask({ ...newtask, id: Date.now() });
     }
+
+    // Reset form
     setNewtask({
       ProjectName: '',
       title: '',
@@ -59,127 +103,133 @@ export default function KanbanBoard() {
       Priority: ''
     });
     setShowForm(false);
+    errorMessage("")
   };
-  const countcolor = (status) => {
-    switch (status) {
-      case 'Unassigned': return 'bg-gray-600';
-      case 'TO DO': return 'bg-pink-500';
-      case 'Inprogress': return 'bg-yellow-500';
-      case 'In Reviews': return 'bg-blue-500';
-      case 'completed': return 'bg-green-500';
-      case 'NEW': return 'bg-indigo-500';
-      default: return 'bg-gray-500';
-    }
-  };
+
+  // Column badge colors
+  const countColor = status => ({
+    Unassigned: 'bg-gray-600',
+    'TO DO': 'bg-pink-500',
+    Inprogress: 'bg-yellow-500',
+    'In Reviews': 'bg-blue-500',
+    completed: 'bg-green-500',
+    NEW: 'bg-indigo-500'
+  }[status] || 'bg-gray-500');
+
   return (
-    <div className="p-4 bg-[#0f172a] text-white w-full h-full my-5 mt-10">
-      <h1 className="text-3xl font-bold mb-4 text-center">
-        {adminuser?.role === 'admin' ? (
-          <>
-            <span className="text-indigo-500">🔹</span> Welcome back, <span className="text-indigo-500">{adminuser?.name || 'Shubham'}</span>. Ready to manage your team?
-            <span className="text-green-500">  💼</span>
-            <br />
-            <span className="text-gray-400 text-sm">Emphasizes leadership and control.</span>
-          </>
-        ) : (
-          <>
-            <span className="text-indigo-500">🔹</span> Welcome back, <span className="text-indigo-500">{adminuser?.name || 'Shubham'}</span>. Ready to check your tasks?
-            <span className="text-yellow-500"> 📝</span>
-            <br />
-            <span className="text-gray-400 text-sm">Focuses on personal responsibilities.</span>
-          </>
-        )}
-      </h1>
-      <h1 className="text-3xl font-bold mb-4">Kanban Board</h1>
+    <div className="p-4 bg-[#0f172a] text-white min-h-screen mt-10">
+      <ErrorToast message={errorMessage} />
+
+      <header className="text-center mb-6">
+        <h1 className="text-3xl font-bold">
+          🔹Welcome back,{' '}
+          <span className="text-indigo-400">{adminuser?.name || 'User'} </span>
+        </h1>
+        <p className="text-gray-400">
+          {adminuser.role === 'admin'
+            ? 'Manage your team tasks below 💼.'
+            : 'Check your assigned tasks below  📝.'}
+        </p>
+      </header>
+
       {adminuser?.role === 'admin' && (
-        <button
-          className="bg-indigo-600 text-white rounded hover:bg-indigo-700 py-2 px-4 mb-3 transform hover:scale-110 transition-transform duration-300"
-          onClick={() => {
-            if (showForm && editTask) {
-              setEditTask(null);
-              setNewtask({
-                ProjectName: '',
-                title: '',
-                ClientName: '',
-                description: '',
-                assignedTo: [],
-                status: 'NEW',
-                deadline: '',
-                Priority: ''
-              });
-            }
-            setShowForm(!showForm);
-            setErrorMessage('');
-          }}
-          disabled={!!editTask && showForm}
-        >
-          {showForm ? 'Cancel' : 'Add Task'}
-        </button>
+        <div className="mb-4 text-left">
+          <button
+            className="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700"
+            onClick={() => setShowForm(!showForm)}
+          >
+            {showForm ? 'Cancel' : '+ Add Task'}
+          </button>
+        </div>
       )}
+
       <Taskinput
         showForm={showForm}
         setShowForm={setShowForm}
         form={newtask}
         setForm={setNewtask}
-        inputClass={inputClass}
+        inputClass="w-full p-2 mb-3 rounded bg-gray-700 text-white"
         errorMessage={errorMessage}
         today={today}
         users={users}
         editTaskId={editTask?.id}
         handleAddOrUpdate={handleAddOrUpdate}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {statuses.map((status) => (
-          <div key={status} className="bg-gray-800 p-4 rounded-md shadow text-white font-semibold mt-2">
-            <h2 className="flex items-center justify-between mb-2">
-              {status}
-              <span className={`${countcolor(status)} text-xs font-bold px-2 py-1 rounded`}>
+
+      {/* Kanban Columns */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-6">
+        {statuses.map(status => (
+          <div key={status} className="bg-gray-800 p-4 rounded shadow">
+            <h2 className="flex justify-between items-center mb-3">
+              <span>{status}</span>
+              <span
+                className={`text-xs font-bold px-2 py-1 rounded ${countColor(
+                  status
+                )}`}
+              >
                 {tasks.filter(t => t.status === status).length}
               </span>
             </h2>
+
             {tasks
-              .filter(task => task.status === status)
-              .filter(task => user.role === "admin" || (Array.isArray(task.assignedTo) && task.assignedTo.includes(user.username)))
+              .filter(
+                t =>
+                  t.status === status &&
+                  (adminuser.role === 'admin' ||
+                    (Array.isArray(t.assignedTo) &&
+                      t.assignedTo.includes(user.username)))
+              )
               .map(task => (
-                <motion.div key={task.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="bg-gray-900 p-3 rounded mb-3 mt-4">
-                  <h4 className="font-semibold text-xl pb-2">{task.ProjectName || 'N/A'}</h4>
-                  <p className="text-sm text-gray-300">{task.description}</p>
-                  <p className="text-sm text-gray-300 m-1">
-                    {Array.isArray(task.assignedTo) && task.assignedTo.length > 0
-                      ? task.assignedTo.map(username => {
-                        const user = Array.isArray(storedUsers) && storedUsers.find(u => u.username === username);
-                        return user ? user.name : username;
-                      }).join(', ')
-                      : 'Unassigned'}
+                <motion.div
+                  key={task.id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-gray-900 p-3 rounded mb-4"
+                >
+                  <h4 className="font-semibold">{task.title}</h4>
+                  <p className="text-sm text-gray-400">{task.description}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Assigned to:{' '}
+                    {task.assignedTo.length
+                      ? task.assignedTo.join(', ')
+                      : '—'}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Deadline: {task.deadline || 'N/A'}</p>
-                  <div className="border my-5"></div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {statuses.filter(s => s !== task.status).map(s => (
-                      <button key={s} className="text-xs bg-gray-800 hover:bg-gray-700 px-1.5 py-0.5 rounded mb-1" onClick={() => moveTaskToColumn(task.id, s)}>
-                        {s}
-                      </button>
-                    ))}
+                  <div className="mt-3 space-x-1">
+                    {statuses
+                      .filter(s => s !== task.status)
+                      .map(s => (
+                        <button
+                          key={s}
+                          className="text-xs bg-gray-800 hover:bg-gray-700 px-1.5 py-0.5 rounded mb-1"                          
+                          onClick={() => handleMoveTask(task.id, s)}
+                        > 
+                          {s}
+                        </button>
+                      ))}
                   </div>
                   {adminuser.role === 'admin' && (
-                    <div className="flex gap-2 mt-2">
-                      <button className="mt-2 text-red-400 text-xs underline" onClick={() => removeTask(task.id)}>
-                        Remove
-                      </button>
+                    <div className="mt-3 flex space-x-2">
                       <button
                         className="text-blue-400 text-xs underline"
-                        onClick={() => {
-                          setEditTask(task);
-                        }}
+                        onClick={() => setEditTask(task)}
                       >
                         Edit
                       </button>
-                    </div>)}
+                      <button
+                        className="text-red-400 text-xs underline"
+                        onClick={() => removeTask(task.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               ))}
           </div>
         ))}
       </div>
-    </div >
+    </div>
   );
 }
