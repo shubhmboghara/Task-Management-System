@@ -1,6 +1,5 @@
 import React, { children, createContext, useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import conf from "../conf/conf";
 const Authcontex = createContext();
 
 
@@ -65,23 +64,22 @@ export const Authprovider = ({ children }) => {
     const Login = (email, password, username, navigate) => {
         const users = JSON.parse(localStorage.getItem("users") || "[]");
 
-
-        if (email === conf.EMAIL &&
-            password == conf.PASSWORD &&
-            username == conf.USERNAME
-
+        if (
+            email === import.meta.env.VITE_EMAIL &&
+            password === import.meta.env.VITE_PASSWORD &&
+            username === import.meta.env.VITE_USERNAME
         ) {
-
             const adminData = {
-                role: conf.ROLE,
-                name:conf.NAME
-            }
-
-            setUser(adminData)
-            localStorage.setItem("user", JSON.stringify(adminData))
-            navigate("/adminpanel")
+                role: import.meta.env.VITE_ROLE,
+                name: import.meta.env.VITE_NAME
+            };
+        
+            setUser(adminData);
+            localStorage.setItem("user", JSON.stringify(adminData));
+            navigate("/adminpanel");
             return;
         }
+        
 
         const foundUser = users.find(u =>
             u.email === email &&
