@@ -1,12 +1,12 @@
 import React from 'react'
 import './App.css'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import Login from './Compontes/Login/Login';
-import Signup from './Compontes/Signup/Signup';
-import Dashboard from './Compontes/Dashboard/Dashboard';
-import Admin_Panel from './Compontes/Admin_Panel/Admin_Panel';
-import Viewusers from './Compontes/ViewUsers/ViewUsers';
-import Tasklist from './Compontes/Tasklist/Tasklist';
+import Login from './Components/Login/Login';
+import Signup from './Components/Signup/Signup';
+import Dashboard from './Components/Dashboard/Dashboard';
+import Admin_Panel from './Components/Admin_Panel/Admin_Panel';
+import Viewusers from './Components/ViewUsers/ViewUsers';
+import Tasklist from './Components/Tasklist/Tasklist';
 import { useAuth } from './Context/AuthContext';
 
 function App() {
