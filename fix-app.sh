@@ -1,3 +1,10 @@
+#!/bin/bash
+echo "Fixing App.jsx import path..."
+sed -i 's/view users\/ViewUsers/ViewUsers\/ViewUsers/g' src/App.jsx
+echo "Creating ViewUsers directory..."
+mkdir -p src/Compontes/ViewUsers
+echo "Creating ViewUsers.jsx file..."
+cat > src/Compontes/ViewUsers/ViewUsers.jsx << 'EOL'
 import React from 'react';
 import { useAuth } from '../../Context/AuthContext';
 import Navabar from '../Navbar/Navabar';
@@ -32,4 +39,7 @@ function Viewusers() {
     );
 }
 
-export default Viewusers; 
+export default Viewusers;
+EOL
+
+echo "Fix completed." 
