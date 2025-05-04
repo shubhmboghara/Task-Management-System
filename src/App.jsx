@@ -5,7 +5,7 @@ import Login from './Compontes/Login/Login';
 import Signup from './Compontes/Signup/Signup';
 import Dashboard from './Compontes/Dashboard/Dashboard';
 import Admin_Panel from './Compontes/Admin_Panel/Admin_Panel';
-import Viewusers from './Compontes/view users/ViewUsers';
+import Viewusers from './Compontes/ViewUsers/ViewUsers';
 import Tasklist from './Compontes/Tasklist/Tasklist';
 import { useAuth } from './Context/AuthContext';
 

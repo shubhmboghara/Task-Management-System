@@ -1,12 +1,15 @@
-const  conf= {
-    EMAIL: String(import.meta.env.VITE_EMAIL),
-    MOBILE_NUMBER: String(import.meta.env.VITE_MOBILE_NUMBER),
-    PASSWORD: String(import.meta.env.VITE_PASSWORD),
-    USERNAME: String(import.meta.env.VITE_USERNAME),
-    NAME: String(import.meta.env.VITE_NAME),
-    NAVIGATE: String(import.meta.env.VITE_NAVIGATE),
-    GENDR: String(import.meta.env.VITE_GENDER),
-    ROLE: String(import.meta.env.VITE_ROLE),
+// Configuration settings for the application
+const conf = {
+  appName: "Task Management System",
+  storagePrefix: "tms_",
+  defaultTheme: "dark",
+  apiEndpoints: {
+    // Add your API endpoints here if needed
+  },
+  roles: {
+    ADMIN: "admin",
+    USER: "user"
+  }
 };
 
-export default conf;
+export default conf; 
