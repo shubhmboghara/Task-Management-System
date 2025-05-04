@@ -58,7 +58,7 @@ function App() {
        element={
         user ? (
           user.role === "admin" ? (
-            <Viewusers  />
+            <ViewUsers  />
           ) : (
             <Navigate to='/dashboard' />
           )
