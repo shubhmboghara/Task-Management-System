@@ -7,9 +7,9 @@ import Taskinput from '../Taskinput/Taskinput';
 export default function KanbanBoard() {
 
   const statuses = ['Unassigned', 'TO DO', 'Inprogress', 'In Reviews', 'completed', 'NEW'];
-  const [storedUsers] = useState(JSON.parse(localStorage.getItem('users')));
-  const [adminuser] = useState(JSON.parse(localStorage.getItem('user')));
-  const [user] = useState(JSON.parse(localStorage.getItem('user')));
+  const [storedUsers] = useState(JSON.parse(localStorage.getItem('users') || '[]'));
+  const [adminuser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
+  const [user] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
   const users = Array.isArray(storedUsers) ? storedUsers : storedUsers ? [storedUsers] : [];
   const today = new Date().toISOString().split('T')[0];
   const [editTask, setEditTask] = useState(null);
@@ -130,7 +130,7 @@ export default function KanbanBoard() {
 
             {tasks
               .filter(task => task.status === status)
-              .filter(task => user.role === "admin" || task.assignedTo.includes(user.username))
+              .filter(task => user.role === "admin" || (Array.isArray(task.assignedTo) && task.assignedTo.includes(user.username)))
               .map(task => (
 
 
@@ -140,9 +140,9 @@ export default function KanbanBoard() {
                   <h4 className="font-semibold text-xl pb-2">{task.title}</h4>
                   <p className="text-sm text-gray-300">{task.description}</p>
                   <p className="text-sm text-gray-300 m-1">
-                    {task.assignedTo.length > 0
+                    {Array.isArray(task.assignedTo) && task.assignedTo.length > 0
                       ? task.assignedTo.map(username => {
-                        const user = storedUsers.find(u => u.username === username);
+                        const user = Array.isArray(storedUsers) && storedUsers.find(u => u.username === username);
                         return user ? user.name : username;
                       }).join(', ')
                       : 'Unassigned'}
