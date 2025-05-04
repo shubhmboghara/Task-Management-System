@@ -25,6 +25,8 @@ const Login = () => {
        }
        
    }
+    
+  
       return (
 
          <div className='bg-[#000015] w-full min-h-screen items-center flex justify-center text-white'>
@@ -62,7 +64,7 @@ const Login = () => {
                   )}
 
 
-                  <span className=' p-2 flex gap-26'>
+                  <span className=' p-2 flex  justify-between'>
 
                      <Link to="/signup">
                         <button

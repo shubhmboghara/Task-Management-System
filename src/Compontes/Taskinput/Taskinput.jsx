@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
 
 const Taskinput = ({
   showForm,
@@ -9,10 +9,16 @@ const Taskinput = ({
   inputClass,
   errorMessage,
   today,
-  users = [],
+  users,
   editTaskId,
   handleAddOrUpdate,
 }) => {
+  useEffect(() => {
+    if (!Array.isArray(form.assignedTo)) {
+      setForm((prev) => ({ ...prev, assignedTo: [] }));
+    }
+  }, [form, setForm]);
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef();
 
@@ -22,21 +28,18 @@ const Taskinput = ({
         setIsDropdownOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleUser = (userId) => {
-    const updated = form.assignedTo.includes(userId)
-      ? form.assignedTo.filter((id) => id !== userId)
-      : [...form.assignedTo, userId];
-
+  const toggleUser = (userKey) => {
+    const updated = form.assignedTo.includes(userKey)
+      ? form.assignedTo.filter((key) => key !== userKey)
+      : [...form.assignedTo, userKey];
+    console.log("Updated assignedTo:", updated);
     setForm((prev) => ({ ...prev, assignedTo: updated }));
   };
-
-  const usersList = Array.isArray(users) ? users : [];
-
-  console.log('Users List:', usersList); // Debugging user list
 
   return (
     <AnimatePresence>
@@ -46,11 +49,11 @@ const Taskinput = ({
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
-          transition={{ duration: 0.4, ease: 'easeInOut' }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
           className="bg-gradient-to-br from-[#1e293b] to-[#334155] p-6 rounded-2xl shadow-2xl mb-4"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {['ProjectName', 'title', 'ClientName', 'description'].map((field) => (
+            {["ProjectName", "title", "ClientName", "description"].map((field) => (
               <input
                 key={field}
                 name={field}
@@ -61,7 +64,6 @@ const Taskinput = ({
               />
             ))}
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div className="relative" ref={dropdownRef} style={{ zIndex: 50 }}>
               <label className="text-white font-medium">Assign to:</label>
@@ -70,35 +72,38 @@ const Taskinput = ({
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
                 {form.assignedTo.length === 0
-                  ? 'Select users'
-                  : usersList
-                      .filter((u) => form.assignedTo.includes(u.id))
+                  ? "Select users"
+                  : users
+                      .filter((u) => form.assignedTo.includes(u.username))
                       .map((u) => u.name)
-                      .join(', ')}
+                      .join(", ")}
               </div>
               {isDropdownOpen && (
                 <div className="absolute bg-white dark:bg-slate-800 shadow-lg border rounded mt-1 w-full max-h-48 overflow-y-auto">
-                  {usersList.map((user) => (
-                    <label
-                      key={user.id}
-                      className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-slate-600"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={form.assignedTo.includes(user.id)}
-                        onChange={() => toggleUser(user.id)}
-                      />
-                      {user.name}
-                    </label>
-                  ))}
+                  {users.length > 0 ? (
+                    users.map((user) => (
+                      <label
+                        key={user.username}
+                        className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-slate-600"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={form.assignedTo.includes(user.username)}
+                          onChange={() => toggleUser(user.username)}
+                        />
+                        {user.name}
+                      </label>
+                    ))
+                  ) : (
+                    <p className="p-2 text-gray-500">No users available</p>
+                  )}
                 </div>
               )}
             </div>
-
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className={inputClass}
+              className={`h-10 ${inputClass}`}
             >
               <option value="NEW">NEW</option>
               <option value="TO DO">TO DO</option>
@@ -106,7 +111,6 @@ const Taskinput = ({
               <option value="In Reviews">In Reviews</option>
               <option value="completed">Completed</option>
             </select>
-
             <input
               type="date"
               value={form.deadline}
@@ -114,7 +118,6 @@ const Taskinput = ({
               min={today}
               className={inputClass}
             />
-
             <select
               value={form.Priority}
               className={inputClass}
@@ -126,20 +129,17 @@ const Taskinput = ({
               <option value="Medium">Medium</option>
             </select>
           </div>
-
           {errorMessage && <p className="text-red-400 mt-2">{errorMessage}</p>}
-
           <div className="flex justify-between">
             <button
               onClick={handleAddOrUpdate}
               className="mt-4 bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition"
             >
-              {editTaskId ? 'Update Task' : 'Add Task'}
+              {editTaskId ? "Update Task" : "Add Task"}
             </button>
-
             <button
               className="bg-indigo-600 text-white hover:bg-indigo-700 mt-4 px-4 py-2 rounded transform hover:scale-110 transition-transform duration-300"
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => setShowForm(false)}
               disabled={!!editTaskId}
             >
               Cancel

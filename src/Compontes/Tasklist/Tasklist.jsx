@@ -10,10 +10,7 @@ function Tasklist() {
 
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("user")) || null)
   const [users, setUsers] = useState(() => JSON.parse(localStorage.getItem("users")) || null)
-  const [taskss, setTaskss] = useState(() => {
-    const saved = localStorage.getItem('tasks');
-    return saved ? JSON.parse(saved) : [];
-  });
+
 
   const [newtask, setNewtask] = useState({
     ProjectName: '',
