@@ -255,10 +255,12 @@ function Tasklist() {
                         Edit
                       </button>
                       <button
-                        onClick={() => removeTask(task.id)}
-                        className="text-red-400 hover:underline"
+                        className="text-blue-400 text-xs underline"
+                        onClick={() => {
+                          setEditTask(task);
+                        }}
                       >
-                        Delete
+                        Edit
                       </button>
                     </td>
                   </tr>

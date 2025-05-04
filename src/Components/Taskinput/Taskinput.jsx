@@ -37,7 +37,6 @@ const Taskinput = ({
     const updated = form.assignedTo.includes(userKey)
       ? form.assignedTo.filter((key) => key !== userKey)
       : [...form.assignedTo, userKey];
-    console.log("Updated assignedTo:", updated);
     setForm((prev) => ({ ...prev, assignedTo: updated }));
   };
 
@@ -134,13 +133,14 @@ const Taskinput = ({
             <button
               onClick={handleAddOrUpdate}
               className="mt-4 bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition"
+              type="button"
             >
               {editTaskId ? "Update Task" : "Add Task"}
             </button>
             <button
               className="bg-indigo-600 text-white hover:bg-indigo-700 mt-4 px-4 py-2 rounded transform hover:scale-110 transition-transform duration-300"
               onClick={() => setShowForm(false)}
-              disabled={!!editTaskId}
+              type="button"
             >
               Cancel
             </button>

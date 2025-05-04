@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTask } from '../../Context/TaskContext';
 import { motion } from 'framer-motion';
 import Taskinput from '../Taskinput/Taskinput';
 
-
 export default function KanbanBoard() {
-
   const statuses = ['Unassigned', 'TO DO', 'Inprogress', 'In Reviews', 'completed', 'NEW'];
   const [storedUsers] = useState(JSON.parse(localStorage.getItem('users') || '[]'));
   const [adminuser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
@@ -15,11 +13,7 @@ export default function KanbanBoard() {
   const [editTask, setEditTask] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
-  const currentUser = users[0] || {};
-
   const inputClass = 'w-full p-2 mb-2 rounded bg-gray-700 text-white border border-gray-600';
-
   const [newtask, setNewtask] = useState({
     ProjectName: '',
     title: '',
@@ -30,14 +24,15 @@ export default function KanbanBoard() {
     deadline: '',
     Priority: ''
   });
-
-  const { tasks, addTask, removeTask, moveTaskToColumn } = useTask();
-
-  const handleAdd = () => {
-    console.log("New Task (before adding):", newtask);
-    if (editTask) return;
+  const { tasks, addTask, removeTask, moveTaskToColumn, updateTask } = useTask();
+  useEffect(() => {
+    if (editTask) {
+      setNewtask({ ...editTask });
+      setShowForm(true);
+    }
+  }, [editTask]);
+  const handleAddOrUpdate = () => {
     const { ProjectName, title, ClientName, description, assignedTo, status, deadline } = newtask;
-
     if (!ProjectName.trim() || !title.trim() || !ClientName.trim() || !description.trim() || !status.trim() || !deadline) {
       setErrorMessage('Please fill out all fields.');
       return;
@@ -47,7 +42,12 @@ export default function KanbanBoard() {
       return;
     }
     setErrorMessage('');
-    addTask({ ...newtask, id: Date.now() });
+    if (editTask) {
+      updateTask(editTask.id, { ...newtask });
+      setEditTask(null);
+    } else {
+      addTask({ ...newtask, id: Date.now() });
+    }
     setNewtask({
       ProjectName: '',
       title: '',
@@ -60,7 +60,6 @@ export default function KanbanBoard() {
     });
     setShowForm(false);
   };
-
   const countcolor = (status) => {
     switch (status) {
       case 'Unassigned': return 'bg-gray-600';
@@ -72,7 +71,6 @@ export default function KanbanBoard() {
       default: return 'bg-gray-500';
     }
   };
-
   return (
     <div className="p-4 bg-[#0f172a] text-white w-full h-full my-5 mt-10">
       <h1 className="text-3xl font-bold mb-4 text-center">
@@ -93,18 +91,31 @@ export default function KanbanBoard() {
         )}
       </h1>
       <h1 className="text-3xl font-bold mb-4">Kanban Board</h1>
-
       {adminuser?.role === 'admin' && (
         <button
           className="bg-indigo-600 text-white rounded hover:bg-indigo-700 py-2 px-4 mb-3 transform hover:scale-110 transition-transform duration-300"
-          onClick={() => setShowForm(!showForm)}
-          disabled={!!editTask}
+          onClick={() => {
+            if (showForm && editTask) {
+              setEditTask(null);
+              setNewtask({
+                ProjectName: '',
+                title: '',
+                ClientName: '',
+                description: '',
+                assignedTo: [],
+                status: 'NEW',
+                deadline: '',
+                Priority: ''
+              });
+            }
+            setShowForm(!showForm);
+            setErrorMessage('');
+          }}
+          disabled={!!editTask && showForm}
         >
           {showForm ? 'Cancel' : 'Add Task'}
         </button>
       )}
-
-
       <Taskinput
         showForm={showForm}
         setShowForm={setShowForm}
@@ -115,9 +126,8 @@ export default function KanbanBoard() {
         today={today}
         users={users}
         editTaskId={editTask?.id}
-        handleAddOrUpdate={handleAdd}
+        handleAddOrUpdate={handleAddOrUpdate}
       />
-
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {statuses.map((status) => (
           <div key={status} className="bg-gray-800 p-4 rounded-md shadow text-white font-semibold mt-2">
@@ -127,17 +137,12 @@ export default function KanbanBoard() {
                 {tasks.filter(t => t.status === status).length}
               </span>
             </h2>
-
             {tasks
               .filter(task => task.status === status)
               .filter(task => user.role === "admin" || (Array.isArray(task.assignedTo) && task.assignedTo.includes(user.username)))
               .map(task => (
-
-
                 <motion.div key={task.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="bg-gray-900 p-3 rounded mb-3 mt-4">
-
-
-                  <h4 className="font-semibold text-xl pb-2">{task.title}</h4>
+                  <h4 className="font-semibold text-xl pb-2">{task.ProjectName || 'N/A'}</h4>
                   <p className="text-sm text-gray-300">{task.description}</p>
                   <p className="text-sm text-gray-300 m-1">
                     {Array.isArray(task.assignedTo) && task.assignedTo.length > 0
@@ -147,7 +152,7 @@ export default function KanbanBoard() {
                       }).join(', ')
                       : 'Unassigned'}
                   </p>
-
+                  <p className="text-xs text-gray-400 mt-1">Deadline: {task.deadline || 'N/A'}</p>
                   <div className="border my-5"></div>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {statuses.filter(s => s !== task.status).map(s => (
@@ -157,15 +162,24 @@ export default function KanbanBoard() {
                     ))}
                   </div>
                   {adminuser.role === 'admin' && (
-                    <button className="mt-2 text-red-400 text-xs underline" onClick={() => removeTask(task.id)}>
-                      Remove
-                    </button>
-                  )}
+                    <div className="flex gap-2 mt-2">
+                      <button className="mt-2 text-red-400 text-xs underline" onClick={() => removeTask(task.id)}>
+                        Remove
+                      </button>
+                      <button
+                        className="text-blue-400 text-xs underline"
+                        onClick={() => {
+                          setEditTask(task);
+                        }}
+                      >
+                        Edit
+                      </button>
+                    </div>)}
                 </motion.div>
               ))}
           </div>
         ))}
       </div>
-    </div>
+    </div >
   );
 }

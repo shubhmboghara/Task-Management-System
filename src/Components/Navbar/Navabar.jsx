@@ -30,7 +30,7 @@ function Navabar() {
 
 
   return (
-    <div className="bg-[#0d0d1a] border-b border-gray-700 shadow-md text-[#f1f5f9]  fixed w-full	z-50">
+    <div className="bg-[#0d0d1a] border-b border-gray-700 shadow-md text-[#f1f5f9]  fixed w-full	z-500">
 
       <nav className="max-w-7xl mx-auto flex justify-between items-center p-4">
 
