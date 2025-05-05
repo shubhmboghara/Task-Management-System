@@ -76,7 +76,7 @@ export default function KanbanBoard() {
   const handleAddOrUpdate = () => {
     console.log('handleAddOrUpdate called', newtask);
     const { ProjectName, title, ClientName, description, assignedTo, status, deadline } = newtask;
-    if (!ProjectName.trim() || !title.trim() || !ClientName.trim() || !description.trim() || !status || !deadline) {
+    if (!ProjectName.trim() || !title.trim() || !ClientName.trim() || !description.trim() || !deadline) {
       toastError('Please fill out all fields.');
       return;
     }
@@ -122,16 +122,21 @@ export default function KanbanBoard() {
   return (
     <div className="p-4 bg-[#0f172a] text-white min-h-screen mt-10">
 
-      {popup && (
-        <div className="fixed bottom-4 sm:top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
-          {popup}
-        </div> 
-      )}
-      {errorMessage && (
-        <div className="fixed bottom-4 sm:top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded shadow-lg z-50">
-          {errorMessage}
-        </div>
-      )}
+      <div className="fixed left-1/2 transform -translate-x-1/2 z-50 space-y-2 top-4 sm:top-4 sm:bottom-auto bottom-auto">
+        {popup && (
+          <div className="bg-green-600 text-white px-4 py-2 rounded shadow-lg">
+            {popup}
+          </div>
+        )}
+        {errorMessage && (
+          <div className="bg-red-600 text-white px-4 py-2 rounded shadow-lg">
+            {errorMessage}
+          </div>
+        )}
+      </div>
+
+
+
 
       <header className="text-center mb-6">
         <h1 className="text-3xl font-bold">

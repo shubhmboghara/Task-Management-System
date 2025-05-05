@@ -84,7 +84,7 @@ const Taskinput = ({
             <div className="relative" ref={dropdownRef} style={{ zIndex: 50 }}>
               <label className="text-white font-medium">Assign to:</label>
               <div
-                className={`border p-2 rounded bg-white text-black cursor-pointer dark:bg-slate-700 dark:text-white`}
+                className={`${inputClass}`}
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
                 {form.assignedTo.length === 0
@@ -119,7 +119,7 @@ const Taskinput = ({
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className={`h-10 ${inputClass} ${missingFields.includes('status') ? 'border-red-500 ring-2 ring-red-400' : ''}`}
+              className={`h-10 ${inputClass}`}
             >
               <option value="NEW">NEW</option>
               <option value="TO DO">TO DO</option>
@@ -137,10 +137,8 @@ const Taskinput = ({
                 type="date"
                 value={form.deadline}
                 onChange={e => setForm({ ...form, deadline: e.target.value })}
-                min={today}   // make sure: const today = new Date().toISOString().split('T')[0]
-                className={`
-                w-full px-4 py-2 rounded-lg bg-gray-800 text-white border
-                border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500
+                min={today}  
+                className={`${inputClass}
                 ${missingFields.includes('deadline') ? 'border-red-500 ring-2 ring-red-400' : ''}
                `}
               />

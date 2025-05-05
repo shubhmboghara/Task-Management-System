@@ -87,7 +87,6 @@ function Tasklist() {
       !ClientName.trim() ||
       !description.trim() ||
       !deadline ||
-      !status ||
       !Priority 
     ) {
       setErrorMessage('Please fill out all fields.');
