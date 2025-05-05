@@ -19,8 +19,23 @@ const Taskinput = ({
     }
   }, [form, setForm]);
 
- 
-  
+  // Track which fields are missing for highlighting
+  const [missingFields, setMissingFields] = useState([]);
+
+  // Listen for errorMessage and check missing fields
+  useEffect(() => {
+    if (errorMessage) {
+      // Do not validate assignedTo field
+      const requiredFields = ["ProjectName", "title", "ClientName", "description", "status", "deadline", "Priority"];
+      const missing = requiredFields.filter(
+        (field) => !form[field] || (typeof form[field] === "string" && !form[field].trim())
+      );
+      setMissingFields(missing);
+    } else {
+      setMissingFields([]);
+    }
+  }, [errorMessage, form]);
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef();
 
@@ -54,6 +69,7 @@ const Taskinput = ({
           transition={{ duration: 0.4, ease: "easeInOut" }}
           className="bg-gradient-to-br from-[#1e293b] to-[#334155] p-6 rounded-2xl shadow-2xl mb-4"
         >
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {["ProjectName", "title", "ClientName", "description"].map((field) => (
               <input
@@ -62,7 +78,7 @@ const Taskinput = ({
                 placeholder={field}
                 value={form[field]}
                 onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} ${missingFields.includes(field) ? 'border-red-500 ring-2 ring-red-400' : ''}`}
               />
             ))}
           </div>
@@ -70,7 +86,7 @@ const Taskinput = ({
             <div className="relative" ref={dropdownRef} style={{ zIndex: 50 }}>
               <label className="text-white font-medium">Assign to:</label>
               <div
-                className="border p-2 rounded bg-white text-black cursor-pointer dark:bg-slate-700 dark:text-white"
+                className={`border p-2 rounded bg-white text-black cursor-pointer dark:bg-slate-700 dark:text-white`}
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
                 {form.assignedTo.length === 0
@@ -105,7 +121,7 @@ const Taskinput = ({
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className={`h-10 ${inputClass}`}
+              className={`h-10 ${inputClass} ${missingFields.includes('status') ? 'border-red-500 ring-2 ring-red-400' : ''}`}
             >
               <option value="NEW">NEW</option>
               <option value="TO DO">TO DO</option>
@@ -118,11 +134,11 @@ const Taskinput = ({
               value={form.deadline}
               onChange={(e) => setForm({ ...form, deadline: e.target.value })}
               min={today}
-              className={inputClass}
+              className={`${inputClass} ${missingFields.includes('deadline') ? 'border-red-500 ring-2 ring-red-400' : ''}`}
             />
             <select
               value={form.Priority}
-              className={inputClass}
+              className={`${inputClass} ${missingFields.includes('Priority') ? 'border-red-500 ring-2 ring-red-400' : ''}`}
               onChange={(e) => setForm({ ...form, Priority: e.target.value })}
             >
               <option value="">Priority</option>
@@ -131,7 +147,10 @@ const Taskinput = ({
               <option value="Medium">Medium</option>
             </select>
           </div>
-          {errorMessage && <p className="text-red-400 mt-2">{errorMessage}</p>}
+          {/* Show error message only at the bottom of the form */}
+          {errorMessage && (
+            <div className="text-red-500 text-sm text-center mb-4 mt-4">{errorMessage}</div>
+          )}
           <div className="flex justify-between">
             <button
               onClick={handleAddOrUpdate}

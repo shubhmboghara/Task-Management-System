@@ -3,16 +3,11 @@ import { useTask } from '../../Context/TaskContext';
 import Navbar from '../Navbar/Navabar';
 import Taskinput from '../Taskinput/Taskinput';
 
-
-
 function Tasklist() {
   const [editTask, setEditTask] = useState(null);
-
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("user")) || null)
   const [users, setUsers] = useState(() => JSON.parse(localStorage.getItem("users")) || null)
-
-
-  
+  const [popup, setPopup] = useState("");
 
   const handleAdd = () => {
     if (editTask) return;
@@ -35,7 +30,6 @@ function Tasklist() {
     setShowForm(false);
   };
 
-  
   const {
     totalTasks,
     pendingTasks,
@@ -46,7 +40,6 @@ function Tasklist() {
     updateTask,
     removeTask,
   } = useTask();
-
 
   const today = new Date().toISOString().split('T')[0];
   const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -65,7 +58,7 @@ function Tasklist() {
     assignedTo: [],
     deadline: '',
     status: '',
-    priority: '',
+    Priority: '', 
   };
   const [form, setForm] = useState(initialForm);
 
@@ -76,7 +69,6 @@ function Tasklist() {
     setShowForm(true);
   };
 
-
   const handleAddOrUpdate = () => {
     const {
       ProjectName,
@@ -86,7 +78,7 @@ function Tasklist() {
       assignedTo,
       deadline,
       status,
-      priority,
+      Priority, 
     } = form;
 
     if (
@@ -94,10 +86,9 @@ function Tasklist() {
       !title.trim() ||
       !ClientName.trim() ||
       !description.trim() ||
-      assignedTo.length === 0 ||
       !deadline ||
       !status ||
-      !priority
+      !Priority 
     ) {
       setErrorMessage('Please fill out all fields.');
       return;
@@ -122,20 +113,34 @@ function Tasklist() {
 
     if (editTaskId) {
       updateTask(payload);
+      setPopup('Task updated successfully!');
     } else {
       addTask(payload);
+      setPopup('Task added successfully!');
     }
 
     setErrorMessage("");
-    setForm(defaultFormState);
+    setForm(initialForm);
     setEditTaskId(null);
     setShowForm(false);
   };
+
+  React.useEffect(() => {
+    if (popup) {
+      const timer = setTimeout(() => setPopup(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [popup]);
 
   return (
     <>
       <Navbar />
       <div className="bg-[#0f172a] w-full min-h-screen text-white p-10">
+        {popup && (
+          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
+            {popup}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-10">
           {[
@@ -187,7 +192,6 @@ function Tasklist() {
             handleAddOrUpdate={handleAddOrUpdate}
           />
 
-
           <div className="px-5 pb-5 overflow-x-auto">
             <table className="min-w-full text-left text-white">
               <thead>
@@ -227,8 +231,6 @@ function Tasklist() {
                           ? task.assignedTo.join(', ')
                           : task.assignedTo || 'Unassigned'}
                       </td>
-
-
                     </td>
                     <td className="px-4 py-2">{task.deadline}</td>
                     <td className="px-4 py-2">
@@ -249,7 +251,10 @@ function Tasklist() {
                         Edit
                       </button>
                       <button
-                        onClick={() => removeTask(task.id)}
+                        onClick={() => {
+                          removeTask(task.id);
+                          setPopup('Task deleted successfully!');
+                        }}
                         className="text-red-400 hover:underline"
                       >
                         Delete

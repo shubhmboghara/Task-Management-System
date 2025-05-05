@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const TaskContext = createContext()
 
@@ -26,6 +26,14 @@ export const TaskProvider = ({ children }) => {
     }
   });
 
+  const [popup, setPopup] = useState("");
+
+  useEffect(() => {
+    if (popup) {
+      const timer = setTimeout(() => setPopup(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [popup]);
 
   const addTask = (task) => {
     const newTasks = [...tasks, task];
@@ -93,10 +101,17 @@ export const TaskProvider = ({ children }) => {
       totalTasks,
       pendingTasks,
       completedTasks,
-      deletedTasksCount 
+      deletedTasksCount,
+      popup,
+      setPopup
     }}>
 
       {children}
+      {popup && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded shadow-lg z-50">
+          {popup}
+        </div>
+      )}
     </TaskContext.Provider>
   )
 

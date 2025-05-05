@@ -3,11 +3,10 @@ import { useTask } from '../../Context/TaskContext';
 import { motion } from 'framer-motion';
 import Taskinput from '../Taskinput/Taskinput';
 
-// A little toast for errors
 function ErrorToast({ message }) {
   if (!message) return null;
   return (
-    <div className="fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded shadow-lg animate-slide-in">
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded shadow-lg z-50">
       {message}
     </div>
   );
@@ -15,6 +14,8 @@ function ErrorToast({ message }) {
 
 export default function KanbanBoard() {
   const statuses = ['Unassigned', 'TO DO', 'Inprogress', 'In Reviews', 'completed', 'NEW'];
+  const statuse = ['', 'TO DO', 'Inprogress', 'In Reviews', 'completed', 'NEW'];
+
   const today = new Date().toISOString().split('T')[0];
   const [storedUsers] = useState(JSON.parse(localStorage.getItem('users') || '[]'));
   const [adminuser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
@@ -37,7 +38,15 @@ export default function KanbanBoard() {
     Priority: ''
   });
 
-  // When editTask changes, populate the form
+  const [popup, setPopup] = useState("");
+
+  useEffect(() => {
+    if (popup) {
+      const timer = setTimeout(() => setPopup(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [popup]);
+
   useEffect(() => {
     if (editTask) {
       setNewtask({ ...editTask });
@@ -45,18 +54,15 @@ export default function KanbanBoard() {
     }
   }, [editTask]);
 
-  // Toast helper
   const toastError = msg => {
     setErrorMessage(msg);
     setTimeout(() => setErrorMessage(''), 3000);
   };
 
-  // Move only if assigned
   const handleMoveTask = (taskId, newStatus) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    // Require assignment before moving out of Unassigned
     if (
       newStatus !== 'Unassigned' &&
       (!Array.isArray(task.assignedTo) || task.assignedTo.length === 0)
@@ -68,18 +74,15 @@ export default function KanbanBoard() {
     moveTaskToColumn(taskId, newStatus);
   };
 
-  // Add or update with validation
   const handleAddOrUpdate = () => {
     const { ProjectName, title, ClientName, description, assignedTo, status, deadline } = newtask;
     if (!ProjectName.trim() || !title.trim() || !ClientName.trim() || !description.trim() || !status || !deadline) {
-      errorMessage('Please fill out all fields.');
+      toastError('Please fill out all fields.');
       return;
     }
     if (deadline < today) {
-      errorMessage('Due Date cannot be in the past.');
       return;
     }
-    // If no one assigned, default column is Unassigned
     if (!assignedTo || assignedTo.length === 0) {
       newtask.status = 'Unassigned';
     }
@@ -87,11 +90,12 @@ export default function KanbanBoard() {
     if (editTask) {
       updateTask(editTask.id, { ...newtask });
       setEditTask(null);
+      setPopup('Task updated successfully!');
     } else {
       addTask({ ...newtask, id: Date.now() });
+      setPopup('Task added successfully!');
     }
 
-    // Reset form
     setNewtask({
       ProjectName: '',
       title: '',
@@ -103,10 +107,9 @@ export default function KanbanBoard() {
       Priority: ''
     });
     setShowForm(false);
-    errorMessage("")
+    setErrorMessage("")
   };
 
-  // Column badge colors
   const countColor = status => ({
     Unassigned: 'bg-gray-600',
     'TO DO': 'bg-pink-500',
@@ -118,7 +121,12 @@ export default function KanbanBoard() {
 
   return (
     <div className="p-4 bg-[#0f172a] text-white min-h-screen mt-10">
-      <ErrorToast message={errorMessage} />
+
+      {popup && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
+          {popup}
+        </div>
+      )}
 
       <header className="text-center mb-6">
         <h1 className="text-3xl font-bold">
@@ -156,7 +164,6 @@ export default function KanbanBoard() {
         handleAddOrUpdate={handleAddOrUpdate}
       />
 
-      {/* Kanban Columns */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-6">
         {statuses.map(status => (
           <div key={status} className="bg-gray-800 p-4 rounded shadow">
@@ -198,15 +205,20 @@ export default function KanbanBoard() {
                   </p>
                   <div className="mt-3 space-x-1">
                     {statuses
-                      .filter(s => s !== task.status)
+                      .filter(s =>
+                        s !== task.status &&
+                        (adminuser?.role === "admin" || s !== "Unassigned")
+
+                      )
                       .map(s => (
                         <button
                           key={s}
-                          className="text-xs bg-gray-800 hover:bg-gray-700 px-1.5 py-0.5 rounded mb-1"                          
+                          className="text-xs bg-gray-800 hover:bg-gray-700 px-1.5 py-0.5 rounded mb-1"
                           onClick={() => handleMoveTask(task.id, s)}
-                        > 
+                        >
                           {s}
                         </button>
+
                       ))}
                   </div>
                   {adminuser.role === 'admin' && (
@@ -219,7 +231,7 @@ export default function KanbanBoard() {
                       </button>
                       <button
                         className="text-red-400 text-xs underline"
-                        onClick={() => removeTask(task.id)}
+                        onClick={() => { removeTask(task.id); setPopup('Task deleted successfully!'); }}
                       >
                         Delete
                       </button>

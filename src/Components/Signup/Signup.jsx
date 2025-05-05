@@ -53,10 +53,10 @@ const Signup = () => {
       setErrorMessage('Please fill out all fields.');
       return;
     }
-    else{
+    else {
       setErrorMessage("")
     }
-    
+
     signup(
       email,
       mobileNumber,
@@ -72,16 +72,16 @@ const Signup = () => {
   return (
 
 
-    <div className='bg-[#000015] w-full min-h-screen items-center flex justify-center text-white   ' 
-   
->
+    <div className='bg-[#000015] w-full min-h-screen items-center flex justify-center text-white   '
 
-<div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-5 border rounded-xl h-[600px] w-full max-w-sm shadow-lg bg-[#0a0a3b] border-[#1c1c6b]"
- style={{
-  boxShadow: '0 0 40px rgba(0, 0, 0, 0.5)',
-}}>
-  
-<h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
+    >
+
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-5 border rounded-xl h-7600px] w-full max-w-sm shadow-lg bg-[#0a0a3b] border-[#1c1c6b] "
+        style={{
+          boxShadow: '0 0 40px rgba(0, 0, 0, 0.5)',
+        }}>
+
+        <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
 
         <form onSubmit={hanlesignup} className="flex flex-col space-y-4">
 
@@ -111,7 +111,7 @@ const Signup = () => {
             <option value="" className='text-black'>Gender</option>
             <option value="Male" className='text-black'>Male </option>
             <option value="Female" className='text-black' >Female </option>
-            
+
           </select>
 
           <select onChange={(e) => setRole(e.target.value)}
@@ -171,7 +171,7 @@ const Signup = () => {
             <div className="text-red-500 text-sm text-center">{errorMessage}</div>
           )}
 
-          <span className="flex gap-27 p-2 ">
+          <span className="flex gap-27 p-2  ">
             <Link to="/Login">
               <button
                 type="button"
@@ -193,7 +193,7 @@ const Signup = () => {
             <button
               type="submit"
               className="bg-[#1a2b95] text-white py-2 px-5 rounded-md hover:bg-blue-700 transition "
-            > 
+            >
               Signup
             </button>
           </span>
