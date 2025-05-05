@@ -123,12 +123,12 @@ export default function KanbanBoard() {
     <div className="p-4 bg-[#0f172a] text-white min-h-screen mt-10">
 
       {popup && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
+        <div className="fixed bottom-4 sm:top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
           {popup}
         </div> 
       )}
       {errorMessage && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded shadow-lg z-50">
+        <div className="fixed bottom-4 sm:top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded shadow-lg z-50">
           {errorMessage}
         </div>
       )}
