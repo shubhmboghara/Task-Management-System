@@ -63,11 +63,14 @@ export const Authprovider = ({ children }) => {
     }, 4000);
   };
 
-  const Login = (email, password, username, navigate) => {
+  const Login = (emailphone, password, username, navigate) => {
     const users = JSON.parse(localStorage.getItem("users") || "[]");
 
-    if (
-      email === import.meta.env.VITE_EMAIL &&
+    const isAdminId  =
+    emailphone === import.meta.env.VITE_EMAIL ||
+    emailphone === import.meta.env.VITE_MOBILE_NUMBER;
+
+    if (isAdminId &&
       password === import.meta.env.VITE_PASSWORD &&
       username === import.meta.env.VITE_USERNAME
     ) {
@@ -87,7 +90,9 @@ export const Authprovider = ({ children }) => {
     }
 
     const foundUser = users.find(
-      u => u.email === email && u.password === password && u.username === username
+      u => (u.email === emailphone || u.mobileNumber == emailphone) &&
+      u.password === password && 
+      u.username === username
     );
 
     if (foundUser) {

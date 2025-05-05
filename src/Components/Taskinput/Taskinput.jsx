@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useState, useEffect, useRef } from "react";
 
+
 const Taskinput = ({
   showForm,
   setShowForm,
@@ -19,13 +20,10 @@ const Taskinput = ({
     }
   }, [form, setForm]);
 
-  // Track which fields are missing for highlighting
   const [missingFields, setMissingFields] = useState([]);
 
-  // Listen for errorMessage and check missing fields
   useEffect(() => {
     if (errorMessage) {
-      // Do not validate assignedTo field
       const requiredFields = ["ProjectName", "title", "ClientName", "description", "status", "deadline", "Priority"];
       const missing = requiredFields.filter(
         (field) => !form[field] || (typeof form[field] === "string" && !form[field].trim())
@@ -39,7 +37,7 @@ const Taskinput = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef();
 
-  
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -69,7 +67,7 @@ const Taskinput = ({
           transition={{ duration: 0.4, ease: "easeInOut" }}
           className="bg-gradient-to-br from-[#1e293b] to-[#334155] p-6 rounded-2xl shadow-2xl mb-4"
         >
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {["ProjectName", "title", "ClientName", "description"].map((field) => (
               <input
@@ -82,7 +80,7 @@ const Taskinput = ({
               />
             ))}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 z-50">
             <div className="relative" ref={dropdownRef} style={{ zIndex: 50 }}>
               <label className="text-white font-medium">Assign to:</label>
               <div
@@ -92,9 +90,9 @@ const Taskinput = ({
                 {form.assignedTo.length === 0
                   ? "Select users"
                   : users
-                      .filter((u) => form.assignedTo.includes(u.username))
-                      .map((u) => u.name)
-                      .join(", ")}
+                    .filter((u) => form.assignedTo.includes(u.username))
+                    .map((u) => u.name)
+                    .join(", ")}
               </div>
               {isDropdownOpen && (
                 <div className="absolute bg-white dark:bg-slate-800 shadow-lg border rounded mt-1 w-full max-h-48 overflow-y-auto">
@@ -129,13 +127,28 @@ const Taskinput = ({
               <option value="In Reviews">In Reviews</option>
               <option value="completed">Completed</option>
             </select>
-            <input
-              type="date"
-              value={form.deadline}
-              onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-              min={today}
-              className={`${inputClass} ${missingFields.includes('deadline') ? 'border-red-500 ring-2 ring-red-400' : ''}`}
-            />
+
+            <div>
+              <label htmlFor="deadline" className="block text-sm font-medium text-white mb-1">
+                Enter Deadline
+              </label>
+              <input
+                id="deadline"
+                type="date"
+                value={form.deadline}
+                onChange={e => setForm({ ...form, deadline: e.target.value })}
+                min={today}   // make sure: const today = new Date().toISOString().split('T')[0]
+                className={`
+                w-full px-4 py-2 rounded-lg bg-gray-800 text-white border
+                border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500
+                ${missingFields.includes('deadline') ? 'border-red-500 ring-2 ring-red-400' : ''}
+               `}
+              />
+
+
+
+            </div>
+
             <select
               value={form.Priority}
               className={`${inputClass} ${missingFields.includes('Priority') ? 'border-red-500 ring-2 ring-red-400' : ''}`}
@@ -147,7 +160,8 @@ const Taskinput = ({
               <option value="Medium">Medium</option>
             </select>
           </div>
-          {/* Show error message only at the bottom of the form */}
+
+
           {errorMessage && (
             <div className="text-red-500 text-sm text-center mb-4 mt-4">{errorMessage}</div>
           )}
