@@ -14,7 +14,6 @@ function ErrorToast({ message }) {
 
 export default function KanbanBoard() {
   const statuses = ['Unassigned', 'TO DO', 'Inprogress', 'In Reviews', 'completed', 'NEW'];
-  const statuse = ['', 'TO DO', 'Inprogress', 'In Reviews', 'completed', 'NEW'];
 
   const today = new Date().toISOString().split('T')[0];
   const [storedUsers] = useState(JSON.parse(localStorage.getItem('users') || '[]'));
@@ -75,6 +74,7 @@ export default function KanbanBoard() {
   };
 
   const handleAddOrUpdate = () => {
+    console.log('handleAddOrUpdate called', newtask);
     const { ProjectName, title, ClientName, description, assignedTo, status, deadline } = newtask;
     if (!ProjectName.trim() || !title.trim() || !ClientName.trim() || !description.trim() || !status || !deadline) {
       toastError('Please fill out all fields.');
